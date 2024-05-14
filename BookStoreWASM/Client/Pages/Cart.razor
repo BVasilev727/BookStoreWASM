@@ -1,0 +1,82 @@
+﻿@page "/cart"
+@using BookStoreWASM.Shared
+@using Blazored.LocalStorage
+@inject ISyncLocalStorageService LocalStorage
+@inject ILocalStorageService asyncLocalStorage
+
+<PageTitle>Cart</PageTitle>
+
+<h3>Hello, @CurrentUser.Identity.Name! This is your cart!</h3>
+<br />
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody style="font-size:24px">
+        @foreach (var item in cart)
+        {
+            <tr>
+                <td class="align-center">
+                    <img src=@item.CoverLink style="max-height:200px;max-width:78px">
+                </td>
+                <td class ="align-center">@item.Title</td>
+                <td class ="align-center">@item.Author</td>
+                <td class ="align-center">@item.Price</td>
+                <td>
+                    <button class="btn btn-outline-warning" @onclick="() => RemoveFromCart(item)">X</button>
+                </td>
+                <td></td>
+            </tr>
+        }
+        <tr style="font-size:30px">
+            <td></td>
+            <td></td>
+            <td>Total: </td>
+            <td><strong>@CalcTotal()</strong></td>
+        </tr>
+    </tbody>
+</table>
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    System.Security.Claims.ClaimsPrincipal CurrentUser;
+    List<BookDTO> cart = new();
+
+    private decimal CalcTotal()
+    {
+        decimal total = 0;
+        foreach (var item in cart)
+        {
+            total += item.Price;
+        }
+        return total;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        CurrentUser = user;
+        var result = LocalStorage.GetItem<List<BookDTO>>("cart " + CurrentUser.Identity.Name);
+        if (result != null)
+        {
+            cart = result;
+        }
+    }
+    private void FindIndex()
+    {
+
+    }
+    private async void RemoveFromCart(BookDTO book)
+    {
+        cart.Remove(book);
+        await asyncLocalStorage.SetItemAsync("cart " + CurrentUser.Identity.Name, cart);
+    }
+}

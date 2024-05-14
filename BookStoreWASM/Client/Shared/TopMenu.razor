@@ -1,0 +1,28 @@
+﻿@using Blazored.LocalStorage
+@using BookStoreWASM.Shared
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISyncLocalStorageService LocalStorage
+
+<a href="cart" class="btn btn-info" style="max-width:110px">
+    <i class="oi oi-cart"></i>
+    Cart
+    <span class="badge badge-pill badge-light" >@cart.Count</span>
+</a>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    System.Security.Claims.ClaimsPrincipal CurrentUser;
+    List<BookDTO> cart = new();
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        CurrentUser = user;
+        var result = LocalStorage.GetItem<List<BookDTO>>("cart " + CurrentUser.Identity.Name);
+        if(result != null)
+        {
+            cart = result;
+        }
+    }
+}

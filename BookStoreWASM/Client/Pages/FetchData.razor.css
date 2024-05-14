@@ -1,0 +1,72 @@
+﻿body {
+}
+
+.book-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    border-width: 2px;
+    border-color: grey;
+    border-style: solid;
+    margin: 20px;
+    min-height: 600px;
+    max-width: 400px;
+    padding:20px;
+    min-width: 400px;
+}
+
+.book-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center
+}
+.books{
+    display:flex;
+    justify-content: space-evenly;
+    gap:50px;
+    flex-wrap: wrap;
+}
+.book-window
+{
+    display:flex;
+    justify-content:space-evenly;
+    align-items: center;
+}
+div.book-window img
+{
+    flex:1;
+    min-width:325px;
+    min-height: 500px;
+}
+.books {
+    display: grid;
+    grid-template: auto / auto auto auto;
+    gap: 10px 20px;
+}
+.cover{
+    display:flex;
+    max-height:300px;
+    max-width: 237px;
+}
+.cover-edit{
+    display:flex;
+    max-height:300px;
+    max-width: 205px;
+}
+.modal-content
+{
+    min-width: 800px;
+    min-height: 700px;
+}
+textarea{
+    display:flex;
+    min-height: 300px;
+}
+.admin-buttons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 30px;
+    margin-right: 70px;
+}

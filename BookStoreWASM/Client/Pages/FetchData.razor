@@ -1,0 +1,264 @@
+﻿@page "/fetchdata"
+@using BookStoreWASM.Shared
+@using Blazored.LocalStorage;
+@inject HttpClient Http
+@inject ILocalStorageService localStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IToastService ToastService
+<link rel="stylesheet" href="~/css/FetchData.razor.css" />
+
+
+
+<PageTitle>Book Catalog</PageTitle>
+
+<h2>Book Catalog</h2>
+
+<AuthorizeView Roles="Administrator">
+<Authorized>
+<button class="btn btn-success" @onclick="AddBook">Add book</button>
+</Authorized>
+</AuthorizeView>
+@if (books == null)
+                {
+        <p><em>Loading...</em></p>
+                }
+                else
+                {
+        <div class="books">
+            @foreach (var book in books)
+            {
+                <div class="book-card" @onclick="() => EditBook(book)">
+                    <img src="@book.CoverLink" alt="book_img" class="cover" />
+                    <div class="book-info">
+                        <div style="font-size:24px;text-align:center;font-weight:bold">@book.Title</div>
+                        <div>@book.Author</div>
+                        <div>@book.Genres</div>
+                        <div style="font-size:25px">@book.Price лв.</div>
+                        <button class="btn btn-outline-primary " @onclick="(() => EditBook(book))">View</button>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (ShowPopup)
+        {
+            <AuthorizeView Roles="Administrator">
+            <Authorized>
+                <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title">@objBook.Title</h3>
+                                <!-- Button to close the popup -->
+                                <button type="button" class="close"
+                                        @onclick="ClosePopup">
+                                    <span aria-hidden="true">X</span>
+                                </button>
+                            </div>
+                            <!-- Edit form for the current forecast -->
+                            <div class="modal-body">
+                                <div class="book-window">
+                                    <img src="@objBook.CoverLink" alt="book_img" class="cover-edit" />
+                                    <div class="book-window-info">
+                                        <label>Title:</label>
+                                        <input class="form-control" type="text"
+                                               placeholder="Book title"
+                                               @bind="objBook.Title" />
+                                        <br />
+                                        <label>Author:</label>
+                                        <input class="form-control" type="text"
+                                               placeholder="Book author"
+                                               @bind="objBook.Author" /><br />
+
+                                        <label>Genres:</label>
+                                        <input class="form-control" type="text-area"
+                                               placeholder="Genres"
+                                               @bind="objBook.Genres" /><br />
+
+
+                                        <label>Price:</label>
+                                        <input class="form-control" type="text"
+                                               placeholder="Price"
+                                               @bind="objBook.Price" /><br />
+
+                                        <label>Description:</label>
+                                        <textarea class="form-control" type="text-area"
+                                                  placeholder="Description" id="text"
+                                                  @bind="objBook.BookDescription" /><br />
+
+                                        <label>In stock:</label>
+                                        <input class="form-control" type="text"
+                                               placeholder="Quantity"
+                                               @bind="objBook.Quantity" /><br />
+                                         <div class="admin-buttons">
+                                                <button class="btn btn-success"
+                                                        @onclick="SaveBook">
+                                                    Save
+                                                </button>
+                                                @if (objBook.BookId > 0)
+                                                {
+                                                    <button class="btn btn-danger" @onclick="DeleteBook">Delete</button>
+                                                }
+                                            </div>
+                                       
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Visitor">
+           <Authorized>
+           
+                <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title">@objBook.Title</h3>
+                                <!-- Button to close the popup -->
+                                <button type="button" class="close"
+                                        @onclick="ClosePopup">
+                                    <span aria-hidden="true">X</span>
+                                </button>
+                            </div>
+                            <!-- Edit form for the current forecast -->
+                            <div class="modal-body">
+                                <div class="book-window">
+                                    <img src="@objBook.CoverLink" alt="book_img" class="cover-edit" />
+                                    <div class="book-window-info">
+                                        <label>Title:</label>
+                                        <input class="form-control" type="text"
+                                               placeholder="Book title"
+                                               @bind="objBook.Title" readonly />
+                                        <br />
+                                        <label>Author:</label>
+                                        <input class="form-control" type="text"
+                                               placeholder="Book author"
+                                               @bind="objBook.Author" readonly /><br />
+
+
+                                        <label>Genres:</label>
+                                        <input class="form-control" type="text-area"
+                                               placeholder="Genres"
+                                               @bind="objBook.Genres" readonly /><br />
+
+                                        <label>Price:</label>
+                                        <input class="form-control" type="text"
+                                               placeholder="Price"
+                                               @bind="objBook.Price" readonly /><br />
+
+                                        <label>Description:</label>
+                                        <textarea class="form-control" type="text-area"
+                                                  placeholder="Description"
+                                                  @bind="objBook.BookDescription" readonly /><br />
+
+                                        <label>In stock:</label>
+                                        <input class="form-control" type="text"
+                                               placeholder="Quantity"
+                                               @bind="objBook.Quantity" readonly /><br />
+
+                                        <button class="btn btn-success" @onclick="AddToCart">
+                                            Add To Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Authorized>
+            </AuthorizeView>
+        }
+      }
+@code {
+    #nullable disable
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private List<BookDTO> books;
+    BookDTO objBook = new BookDTO();
+    bool ShowPopup = false;
+    System.Security.Claims.ClaimsPrincipal CurrentUser;
+    string ADMINISTRATION_ROLE = "Administrators";
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        CurrentUser = user;
+
+        if (user.Identity != null)
+        {
+            books = await Http.GetFromJsonAsync<List<BookDTO>>("api/Book/GetAsync");
+        }
+    }
+
+
+    void ClosePopup()
+    {
+        ShowPopup = false;
+    }
+
+    void AddBook()
+    {
+        objBook = new BookDTO();
+        objBook.BookId = 0;
+        ShowPopup = true;
+    }
+
+    async Task SaveBook()
+    {
+        ShowPopup = false;
+
+        var user = (await authenticationStateTask).User;
+
+        if (objBook.BookId == 0)
+        {
+            //new book
+            BookDTO objNewBookDTO = new BookDTO();
+            objNewBookDTO.BookId = objBook.BookId;
+            objNewBookDTO.Author = objBook.Author;
+            objNewBookDTO.Title = objBook.Title;
+            objNewBookDTO.Quantity = objBook.Quantity;
+            objNewBookDTO.Price = objBook.Price;
+            objNewBookDTO.CoverLink = objBook.CoverLink;
+            objNewBookDTO.Genres = objBook.Genres;
+            objNewBookDTO.BookDescription = objBook.BookDescription;
+            objNewBookDTO.UserName = "";
+            await Http.PostAsJsonAsync("api/Book/Post", objNewBookDTO);
+        }
+        else
+        {
+            //update book
+            await Http.PostAsJsonAsync("api/Book/Put", objBook);
+        }
+
+        books = await Http.GetFromJsonAsync<List<BookDTO>>("api/Book/GetAsync");
+    }
+    void EditBook(BookDTO bookDTO)
+    {
+        objBook = bookDTO;
+        ShowPopup = true;
+    }
+    async Task DeleteBook()
+    {
+        ShowPopup = false;
+
+        await Http.DeleteAsync("api/Book/Delete/" + Convert.ToInt32(objBook.BookId));
+
+        books = await Http.GetFromJsonAsync<List<BookDTO>>("api/Book/GetAsync");
+    }
+
+    private async Task AddToCart()
+    {
+        var cart = await localStorage.GetItemAsync<List<BookDTO>>("cart " + CurrentUser.Identity.Name);
+        if(cart == null)
+        {
+            cart = new List<BookDTO>();
+        }
+        cart.Add(objBook);
+        await localStorage.SetItemAsync("cart " + CurrentUser.Identity.Name, cart);
+        ToastService.ShowSuccess(objBook.Title + " Added to cart");
+
+    }
+}

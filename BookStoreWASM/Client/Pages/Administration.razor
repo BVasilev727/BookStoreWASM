@@ -1,0 +1,139 @@
+﻿@page "/admin"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using BookStoreWASM.Shared
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+@attribute [Authorize(Roles = "Administrator")]
+
+<PageTitle>Administration</PageTitle>
+
+<h3>Administration</h3>
+<table class="table">
+    <thead>
+        <tr style="font-size:25px">
+            <th>User Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users)
+        {
+            <tr style="font-size:20px">
+                <td>@user.Name</td>
+                <td>@user.Email</td>
+                <td>@user.Password</td>
+                <td>
+                    <button class="btn btn-outline-primary" @onclick="()=>ViewUser(user)">Edit</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if(ShowPopup){
+<div class="modal" tabindex="-1" style="display:block" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit User</h3>
+                <!-- Button to close the popup -->
+                <button type="button" class="close"
+                        @onclick="ClosePopup">
+                    <span aria-hidden="true">X</span>
+                </button>
+            </div>
+            <!-- Edit form for the current user -->
+            <div class="modal-body">
+                <!-- Only show Id if not a new user -->
+                @if (objUser.Id != "")
+                {
+                    <p>@objUser.Id</p>
+                }
+                <!-- Only allow edit if a new user -->
+                @if (objUser.Id != "")
+                {
+                    <p>@objUser.Name</p>
+                }
+                else
+                {
+                <input class="form-control" type="text"
+                           placeholder="UserName"
+                           @bind="objUser.Name" readonly/>
+                }
+                <input class="form-control" type="text"
+                       placeholder="Email"
+                       @bind="objUser.Email" readonly/>
+                       <br />
+                <input class="form-control" type="password"
+                       placeholder="Password"
+                       @bind="objUser.Password" readonly/>
+                   
+                <br /><br />
+                <!-- Button to save the user -->
+                <button class="btn btn-primary" @onclick="ShowAlert">
+                    Save
+                </button>
+               
+                <!-- Only show delete button if not a new record -->
+                @if (objUser.Id != "")
+                {
+                    <!-- Button to delete the forecast -->
+                    <button class="btn btn-danger"
+                          style="margin-left:15px;" @onclick="DeleteUser">
+                        Delete
+                    </button>
+                }
+                @if(alert)
+                {
+                    <br />
+                    <br />
+                        <p>This feature has not yet been implemented</p>
+                }
+                <br />
+            </div>
+        </div>
+    </div>
+</div>
+}
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    AspNetUserDTO objUser = new();
+    private List<AspNetUserDTO> users = new();
+    private bool ShowPopup = false;
+    private bool alert = false;
+    private void ShowAlert()
+    {
+        alert = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        if(user!=null)
+        {
+            users = await Http.GetFromJsonAsync<List<AspNetUserDTO>>("api/User/GetAsync");
+        }
+    }
+    private void ClosePopup()
+    {
+        ShowPopup = false;
+        alert = false;
+    }
+
+    async Task ViewUser(AspNetUserDTO user)
+    {
+        objUser = user;
+        ShowPopup = true;
+    }
+    async Task DeleteUser()
+    {
+        ShowPopup = false;
+        await Http.DeleteAsync("api/User/Delete/" + objUser.Id);
+
+        users = await Http.GetFromJsonAsync<List<AspNetUserDTO>>("api/User/GetAsync");
+    }
+}

@@ -6,11 +6,24 @@
 
 <AuthorizeView>
     <Authorized>
-        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+        
+        <button class="nav-link btn btn-link" @onclick="BeginSignOut">
+            <Icon Name="IconName.PersonDash"></Icon>
+            Log out
+        </button>
     </Authorized>
     <NotAuthorized>
-        <a href="authentication/register">Register</a>
-        <a href="authentication/login">Log in</a>
+        
+        <a href="authentication/register">
+            <Icon Name="IconName.PersonPlus"></Icon>
+            Register
+        </a>
+        <br />
+        
+        <a href="authentication/login">
+            <Icon Name="IconName.PersonCheck"></Icon>
+            Log in
+        </a>
     </NotAuthorized>
 </AuthorizeView>
 

@@ -109,9 +109,7 @@
                 </div>
             </Authorized>
                 </AuthorizeView>
-                <AuthorizeView Roles="Visitor">
-           <Authorized>
-           
+                
                 <div class="modal" tabindex="-1" style="display:block" role="dialog">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -168,8 +166,6 @@
                         </div>
                     </div>
                 </div>
-            </Authorized>
-            </AuthorizeView>
         }
       }
 @code {
@@ -251,14 +247,20 @@
 
     private async Task AddToCart()
     {
-        var cart = await localStorage.GetItemAsync<List<BookDTO>>("cart " + CurrentUser.Identity.Name);
-        if(cart == null)
+        if(CurrentUser!=null)
         {
-            cart = new List<BookDTO>();
+            var cart = await localStorage.GetItemAsync<List<BookDTO>>("cart " + CurrentUser.Identity.Name);
+            if(cart == null)
+            {
+                cart = new List<BookDTO>();
+            }
+            cart.Add(objBook);
+            await localStorage.SetItemAsync("cart " + CurrentUser.Identity.Name, cart);
+            ToastService.ShowSuccess(objBook.Title + " Added to cart");
         }
-        cart.Add(objBook);
-        await localStorage.SetItemAsync("cart " + CurrentUser.Identity.Name, cart);
-        ToastService.ShowSuccess(objBook.Title + " Added to cart");
-
+        else
+        {
+            ToastService.ShowInfo("You need to be registered to do this!");
+        }
     }
 }

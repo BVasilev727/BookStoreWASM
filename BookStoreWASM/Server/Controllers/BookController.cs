@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreWASM.Server.Controllers
 {
-
     [Authorize]
     [ApiController]
     public class BookController : ControllerBase
@@ -20,6 +19,7 @@ namespace BookStoreWASM.Server.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("api/Book/GetAsync")]
         public async Task<List<BookDTO>> GetAsync()
@@ -45,7 +45,6 @@ namespace BookStoreWASM.Server.Controllers
             }
             return ColBooks;
         }
-
         [HttpGet]
         [Route("api/Book/GetBook/{id}")]
         public async Task<BookDTO> GetBook(int id)
@@ -67,7 +66,6 @@ namespace BookStoreWASM.Server.Controllers
             }
             return null;
         }
-
         [HttpPost]
         [Route("api/Book/Post")]
         public void Post([FromBody] BookDTO paramBook)
@@ -87,7 +85,6 @@ namespace BookStoreWASM.Server.Controllers
             _context.Books.Add(objBook);
             _context.SaveChanges();
         }
-
         [HttpPut]
         [Route("api/Book/Put")]
         public void Put([FromBody] BookDTO objBook)

@@ -1,4 +1,38 @@
 ﻿@page "/"
-
+@using BookStoreWASM.Client;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JSRuntime
 <PageTitle>Home</PageTitle>
 
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="welcome-message">
+            Welcome to BookStoreWASM! Log in or register to access the calalog!
+        </div>
+    </NotAuthorized>
+    <Authorized>
+        <div class="welcome-message">
+            Welcome back, @CurrentUser.Identity.Name!
+            <br />
+            <div class="welcome-submessage">
+                We're thrilled to have you return. As a valued member of our community,
+                you have access to exclusive features and personalized content designed just for you. Dive in and enjoy
+                your time exploring what we have to offer!
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    
+    System.Security.Claims.ClaimsPrincipal CurrentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        CurrentUser = authState.User;
+    }
+}

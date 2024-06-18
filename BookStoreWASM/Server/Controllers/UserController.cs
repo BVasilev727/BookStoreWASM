@@ -23,8 +23,6 @@ namespace BookStoreWASM.Server.Controllers
         public async Task<List<AspNetUserDTO>> GetAsync()
         {
             var resultUsers = await _context.AspNetUsers.AsNoTracking().ToListAsync();
-            var resultRoles = await _context.AspNetRoles.AsNoTracking().ToListAsync();
-            
             List<AspNetUserDTO> ColUsers = new List<AspNetUserDTO>();
 
             foreach (var item in resultUsers)
@@ -34,7 +32,6 @@ namespace BookStoreWASM.Server.Controllers
                 user.Name = item.UserName;
                 user.Email = item.Email;
                 user.Password = "*****";
-                
                 ColUsers.Add(user);
             }
             return ColUsers;

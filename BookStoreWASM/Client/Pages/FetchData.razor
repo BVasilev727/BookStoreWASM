@@ -7,8 +7,6 @@
 @inject IToastService ToastService
 <link rel="stylesheet" href="~/css/FetchData.razor.css" />
 
-
-
 <PageTitle>Book Catalog</PageTitle>
 
 <h2>Book Catalog</h2>
@@ -41,7 +39,7 @@
         </div>
         @if (ShowPopup)
         {
-            <AuthorizeView Roles="Administrator">
+            @if(CurrentUser.IsInRole("Administrator")){ <AuthorizeView Roles="Administrator">
             <Authorized>
                 <div class="modal" tabindex="-1" style="display:block" role="dialog">
                     <div class="modal-dialog">
@@ -109,8 +107,8 @@
                 </div>
             </Authorized>
                 </AuthorizeView>
-                
-                <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                }
+           else{ <div class="modal" tabindex="-1" style="display:block" role="dialog">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -165,7 +163,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>}
+               
         }
       }
 @code {
@@ -226,7 +225,7 @@
         else
         {
             //update book
-            await Http.PostAsJsonAsync("api/Book/Put", objBook);
+            await Http.PutAsJsonAsync("api/Book/Put", objBook);
         }
 
         books = await Http.GetFromJsonAsync<List<BookDTO>>("api/Book/GetAsync");

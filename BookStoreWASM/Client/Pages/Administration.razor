@@ -14,7 +14,8 @@
         <tr style="font-size:25px">
             <th>User Name</th>
             <th>Email</th>
-            <th>Role</th>
+            <th>Password Hash</th>
+            <th></th>
             <th></th>
         </tr>
     </thead>
@@ -25,6 +26,7 @@
                 <td>@user.Name</td>
                 <td>@user.Email</td>
                 <td>@user.Password</td>
+                <td></td>
                 <td>
                     <button class="btn btn-outline-primary" @onclick="()=>ViewUser(user)">Edit</button>
                 </td>

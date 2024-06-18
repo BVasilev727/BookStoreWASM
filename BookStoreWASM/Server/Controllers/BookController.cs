@@ -89,9 +89,6 @@ namespace BookStoreWASM.Server.Controllers
         [Route("api/Book/Put")]
         public void Put([FromBody] BookDTO objBook)
         {
-            string currUser = this.User.Claims.Where(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")
-                .FirstOrDefault().Value;
-
             var ExistingBook = _context.Books.
                 Where(x => x.BookId == objBook.BookId).FirstOrDefault();
 
@@ -100,12 +97,13 @@ namespace BookStoreWASM.Server.Controllers
                 ExistingBook.BookId = objBook.BookId;
                 ExistingBook.Author = objBook.Author;
                 ExistingBook.Title = objBook.Title;
-                ExistingBook.UserName = currUser;
+                ExistingBook.UserName = objBook.UserName;
                 ExistingBook.Quantity = objBook.Quantity;
                 ExistingBook.Price = objBook.Price;
                 ExistingBook.CoverLink = objBook.CoverLink;
                 ExistingBook.Genres = objBook.Genres;
                 ExistingBook.BookDescription= objBook.BookDescription;
+                
                 _context.SaveChanges();
             }
         }

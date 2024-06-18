@@ -1,5 +1,5 @@
 ﻿@inject AuthenticationStateProvider AuthenticationStateProvider
-
+@inject IJSRuntime JSRuntime
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="">BookStoreWASM</a>
@@ -36,8 +36,8 @@
                 </AuthorizeView>
             </ul>
             <div class="right-menu">
-                
-                <Dropdown Direction="DropdownDirection.DropdownCentered">
+                <TopMenu />
+                <Dropdown Direction="DropdownDirection.Dropstart">
                     <DropdownToggleButton Color="ButtonColor.Secondary">
                         <Icon Name="IconName.PersonCircle" />
                     </DropdownToggleButton>
@@ -52,7 +52,7 @@
                         <LoginDisplay />
                     </DropdownMenu>
                 </Dropdown>
-                <TopMenu />
+                
             </div>
         </div>
     </div>
@@ -65,12 +65,14 @@
     private string? NavBarCssClass => collapseNavMenu ? null : "show";
     private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
 
+
     System.Security.Claims.ClaimsPrincipal CurrentUser;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationStateTask;
         CurrentUser = authState.User;
+        await JSRuntime.InvokeVoidAsync("removeCssVariable", "--bs-dropdown-bg");
     }
 
     private void ToggleNavMenu()

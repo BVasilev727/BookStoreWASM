@@ -3,7 +3,7 @@
 @using Blazored.LocalStorage
 @inject ISyncLocalStorageService LocalStorage
 @inject ILocalStorageService asyncLocalStorage
-
+@inject IToastService ToastService
 <PageTitle>Cart</PageTitle>
 
 <h3>Hello, @CurrentUser.Identity.Name! This is your cart!</h3>
@@ -24,12 +24,15 @@
         @foreach (var item in cart)
         {
             <tr>
+                <td>
+                    <input type="checkbox" @onchange = "eventArgs => {CheckBoxClicked(item,eventArgs.Value);}" />
+                </td>
                 <td class="align-center">
                     <img src=@item.CoverLink style="max-height:200px;max-width:78px">
                 </td>
                 <td class ="align-center">@item.Title</td>
                 <td class ="align-center">@item.Author</td>
-                <td class ="align-center">@item.Price</td>
+                <td class ="align-center">@item.Price лв.</td>
                 <td>
                     <button class="btn btn-outline-warning" @onclick="() => RemoveFromCart(item)">X</button>
                 </td>
@@ -39,8 +42,20 @@
         <tr style="font-size:30px">
             <td></td>
             <td></td>
+            <td></td>
             <td>Total: </td>
-            <td><strong>@CalcTotal()</strong></td>
+            <td><strong>@CalcTotal() лв.</strong></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <button class="btn btn-primary" @onclick="Order">Order</button>
+            </td>
+            <td></td>
+            <td></td>
         </tr>
     </tbody>
 </table>
@@ -49,11 +64,14 @@
     private Task<AuthenticationState> authenticationStateTask { get; set; }
     System.Security.Claims.ClaimsPrincipal CurrentUser;
     List<BookDTO> cart = new();
+    List<BookDTO> order = new();
+
+    public string text;
 
     private decimal CalcTotal()
     {
         decimal total = 0;
-        foreach (var item in cart)
+        foreach (var item in order)
         {
             total += item.Price;
         }
@@ -70,10 +88,34 @@
             cart = result;
         }
     }
-    private void FindIndex()
-    {
 
+    void CheckBoxClicked(BookDTO book,object checkedValue)
+    {
+        if((bool)checkedValue)
+        {
+            if(!order.Contains(book))
+            {
+                order.Add(book);
+            }
+        }
+        else
+        {
+            if(order.Contains(book))
+            {
+                order.Remove(book);
+            }
+        }
     }
+
+    void Order()
+    {
+        foreach(var item in order)
+        {
+            RemoveFromCart(item);    
+        }
+        ToastService.ShowSuccess("Order has been completed and shipped!");
+    }
+
     private async void RemoveFromCart(BookDTO book)
     {
         cart.Remove(book);
